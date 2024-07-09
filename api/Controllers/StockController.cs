@@ -10,7 +10,7 @@ using api.Dtos;
 using api.Mappers;
 using api.Dtos.Stock;
 using Microsoft.EntityFrameworkCore;               //it is neccessary for async await.
-
+using api.Interfaces;
 
 
 
@@ -21,8 +21,10 @@ namespace api.Controllers
     public class StockController:ControllerBase   //necessary to inherit this ControllerBase class.
     {
         private readonly ApplicationDbContext _context;
-        public StockController(ApplicationDbContext context){
+        private readonly IStockRepository _StockRepo;  //this is used for adding extra layer of abstraction.
+        public StockController(ApplicationDbContext context, IStockRepository StockRepo){
             _context=context;
+            _StockRepo=StockRepo;  
         }
 
         //following is a example of how to write method without async-await.
@@ -37,7 +39,7 @@ namespace api.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll(){                 //here StockMappers is a class which consist of the ToStockDto method.
-            var stocks=await _context.Stocks.ToListAsync();  //tolist becuase it converts the sql object into the list & list to stockdto.
+            var stocks=await _StockRepo.GetAllAsync();  //tolist becuase it converts the sql object into the list & list to stockdto.
             var stockDto=stocks.Select(s=>StockMappers.ToStockDto_(s));
             return Ok(stocks);
         }
